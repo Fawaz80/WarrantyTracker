@@ -1,0 +1,64 @@
+{
+    "users": [
+      {
+        "email": "john.doe@example.com",
+        "password": "securePass123!",
+        "items": [
+          {
+            "name": "MacBook Pro 16\"",
+            "receipt": "receipt_macbook.jpg",
+            "startDate": "2023-11-15",
+            "endDate": "2025-11-15",
+            "notes": "AppleCare+ until 2025",
+            "image": null
+          },
+          {
+            "name": "Sony WH-1000XM5",
+            "receipt": null,
+            "startDate": "2023-09-01",
+            "endDate": "2024-09-01",
+            "notes": "Manufacturer warranty",
+            "image": null
+          },
+          {
+            "name": "Dyson V12 Detect",
+            "receipt": "receipt_dyson.pdf",
+            "startDate": "2023-07-20",
+            "endDate": "2026-07-20",
+            "notes": "Extended 3-year warranty",
+            "image": null
+          }
+        ]
+      },
+      {
+        "email": "sarah.smith@example.com",
+        "password": "myWarrantyTracker456",
+        "items": [
+          {
+            "name": "iPhone 15 Pro",
+            "receipt": "receipt_iphone.jpg",
+            "startDate": "2023-10-10",
+            "endDate": "2025-10-10",
+            "notes": "Purchased with AppleCare",
+            "image": null
+          },
+          {
+            "name": "Bose QuietComfort 45",
+            "receipt": null,
+            "startDate": "2023-05-15",
+            "endDate": "2024-05-15",
+            "notes": "Noise cancelling headphones",
+            "image": null
+          },
+          {
+            "name": "Ninja Foodi Grill",
+            "receipt": "receipt_ninja.pdf",
+            "startDate": "2023-01-20",
+            "endDate": "2025-01-20",
+            "notes": "2-year warranty",
+            "image": null
+          }
+        ]
+      }
+    ]
+  }
