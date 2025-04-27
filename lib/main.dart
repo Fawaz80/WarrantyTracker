@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
 import 'services/storage_service.dart';
+
 void main() {
   runApp(const WarrantyTrackerApp());
 }
@@ -27,7 +28,7 @@ class WarrantyTrackerApp extends StatelessWidget {
         useMaterial3: true,
       ),
       themeMode: ThemeMode.system, // This will follow system theme
-      home:  LoginScreen(),
+      home: LoginScreen(),
     );
   }
 }
