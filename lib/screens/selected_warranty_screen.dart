@@ -1,10 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:warranty_tracker_project/models/item.dart';
 
 class SelectedWarrantyScreen extends StatefulWidget {
-  const SelectedWarrantyScreen({super.key});
-
+  const SelectedWarrantyScreen({super.key, required this.item});
+  final Item item;
   @override
   State<SelectedWarrantyScreen> createState() => _SelectedWarrantyScreenState();
 }
@@ -17,7 +20,6 @@ class _SelectedWarrantyScreenState extends State<SelectedWarrantyScreen> {
   final TextEditingController notes = TextEditingController();
 
   @override
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -29,21 +31,32 @@ class _SelectedWarrantyScreenState extends State<SelectedWarrantyScreen> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              buildTextField('Warranty Name', warrantyName),
+              buildTextField(widget.item.getName, warrantyName),
               const SizedBox(height: 20),
-              buildTextField('Receipt Number', receiptName),
+              buildTextField(widget.item.getReceipt, receiptName),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  buildSelectDateButton('Start Date', startDateController),
-                  buildSelectDateButton('End Date', endDateController),
+                  buildSelectDateButton(
+                      widget.item.getStartDate, startDateController),
+                  buildSelectDateButton(
+                      widget.item.getEndDate, endDateController),
                 ],
               ),
               const SizedBox(height: 20),
-              buildTextField('Notes', notes),
+              buildTextField(widget.item.getNotes, notes),
               const SizedBox(height: 20),
-              Text('Take picture of barcode/QR code'),
+              if (widget.item.getImage != null)
+                Image.file(
+                  widget.item.getImage! as File,
+                  width: 100,
+                  height: 100,
+                )
+              else
+                const Text('No image uploaded'),
+              const SizedBox(height: 20),
+              Text('Update barcode/QR code'),
               const SizedBox(height: 20),
               // Button to allow user to select image or take a picture
               ElevatedButton(
@@ -101,14 +114,14 @@ class _SelectedWarrantyScreenState extends State<SelectedWarrantyScreen> {
     );
   }
 
-  Widget buildTextField(String hintText, TextEditingController controller) {
+  Widget buildTextField(String? label, TextEditingController controller) {
     return TextField(
       maxLines: 1,
       controller: controller,
       textAlign: TextAlign.center,
       style: const TextStyle(fontSize: 20),
       decoration: InputDecoration(
-        hintText: hintText,
+        hintText: label,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.blue, width: 2),
