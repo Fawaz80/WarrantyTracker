@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import '../models/user.dart';
 import 'new_warranty_screen.dart';
 import 'selected_warranty_screen.dart';
-import 'package:intl/intl.dart';  // To format the date easily
+import 'package:intl/intl.dart'; // To format the date easily
 
 class MyWarrantiesScreen extends StatefulWidget {
-  final User user;  // Accept user parameter
+  final User user; // Accept user parameter
 
-  const MyWarrantiesScreen({super.key, required this.user});  // Update constructor
+  const MyWarrantiesScreen(
+      {super.key, required this.user}); // Update constructor
 
   @override
   _MyWarrantiesScreenState createState() => _MyWarrantiesScreenState();
@@ -87,7 +88,8 @@ class _MyWarrantiesScreenState extends State<MyWarrantiesScreen> {
             // Warranty List
             Expanded(
               child: ListView.builder(
-                itemCount: widget.user.items.length,  // Iterate through user's warranty items
+                itemCount: widget
+                    .user.items.length, // Iterate through user's warranty items
                 itemBuilder: (context, index) {
                   final warranty = widget.user.items[index];
                   String timeLeft = calculateTimeLeft(warranty.getEndDate);
@@ -100,7 +102,9 @@ class _MyWarrantiesScreenState extends State<MyWarrantiesScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SelectedWarrantyScreen(),
+                          builder: (context) => SelectedWarrantyScreen(
+                            item: warranty,
+                          ),
                         ),
                       );
                     },
@@ -112,26 +116,31 @@ class _MyWarrantiesScreenState extends State<MyWarrantiesScreen> {
             Column(
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Align buttons in a row
+                  mainAxisAlignment:
+                      MainAxisAlignment.spaceEvenly, // Align buttons in a row
                   children: [
                     ElevatedButton(
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => NewWarrantyScreen(user: widget.user)),
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  NewWarrantyScreen(user: widget.user)),
                         );
                       },
                       child: const Text('Add New Warranty'),
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SelectedWarrantyScreen()),
-                        );
-                      },
-                      child: const Text('View Selected Warranty'),
-                    ),
+                    // ElevatedButton(
+                    //   onPressed: () {
+                    //     Navigator.push(
+                    //       context,
+                    //       MaterialPageRoute(
+                    //           builder: (context) =>
+                    //               const SelectedWarrantyScreen()),
+                    //     );
+                    //   },
+                    //   child: const Text('View Selected Warranty'),
+                    // ),
                   ],
                 ),
                 const SizedBox(height: 20),
