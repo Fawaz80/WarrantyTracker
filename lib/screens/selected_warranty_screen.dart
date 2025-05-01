@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:warranty_tracker_project/models/item.dart';
+import 'package:warranty_tracker_project/models/user.dart';
 
 class SelectedWarrantyScreen extends StatefulWidget {
-  const SelectedWarrantyScreen({super.key, required this.item});
+  const SelectedWarrantyScreen(
+      {super.key, required this.user, required this.item});
+  final User user;
   final Item item;
   @override
   State<SelectedWarrantyScreen> createState() => _SelectedWarrantyScreenState();
@@ -94,13 +97,30 @@ class _SelectedWarrantyScreenState extends State<SelectedWarrantyScreen> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      // TODO: Handle save action
+                      Item updatedItem = Item(
+                        name: warrantyName.text,
+                        startDate: startDateController.text,
+                        endDate: endDateController.text,
+                        notes: notes.text,
+                        receipt: receiptName.text,
+                      );
+                      int index = widget.user.items.indexWhere(
+                          (item) => item.getName == widget.item.getName);
+                      if (index != -1) {
+                        widget.user.items[index] = updatedItem;
+                      }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Warranty updated successfully!'),
+                        ),
+                      );
+                      Navigator.pop(context);
                     },
                     child: const Text('Save'),
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      // TODO: Handle cancel action
+                      dispose();
                       Navigator.pop(context);
                     },
                     child: const Text('Cancel'),

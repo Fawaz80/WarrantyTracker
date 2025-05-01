@@ -104,6 +104,7 @@ class _MyWarrantiesScreenState extends State<MyWarrantiesScreen> {
                         MaterialPageRoute(
                           builder: (context) => SelectedWarrantyScreen(
                             item: warranty,
+                            user: widget.user,
                           ),
                         ),
                       );

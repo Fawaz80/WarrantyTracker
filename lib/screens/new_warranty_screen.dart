@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:warranty_tracker_project/models/item.dart';
 import '../models/user.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -19,15 +20,15 @@ class _NewWarrantyScreenState extends State<NewWarrantyScreen> {
   final TextEditingController receiptName = TextEditingController();
   final TextEditingController notes = TextEditingController();
 
-  @override
-  void dispose() {
-    startDateController.dispose();
-    startDateController.dispose();
-    warrantyName.dispose();
-    receiptName.dispose();
-    notes.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   startDateController.dispose();
+  //   startDateController.dispose();
+  //   warrantyName.dispose();
+  //   receiptName.dispose();
+  //   notes.dispose();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -93,13 +94,26 @@ class _NewWarrantyScreenState extends State<NewWarrantyScreen> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      // TODO: Handle save action
+                      Item newItem = Item(
+                        name: warrantyName.text,
+                        startDate: startDateController.text,
+                        endDate: endDateController.text,
+                        notes: notes.text,
+                        receipt: receiptName.text,
+                      );
+                      widget.user.items.add(newItem);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Warranty added successfully!'),
+                        ),
+                      );
+                      Navigator.pop(context, newItem);
                     },
                     child: const Text('Save'),
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      // TODO: Handle cancel action
+                      // dispose();
                       Navigator.pop(context);
                     },
                     child: const Text('Cancel'),
