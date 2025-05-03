@@ -3,6 +3,7 @@ import '../models/user.dart';
 import 'new_warranty_screen.dart';
 import 'selected_warranty_screen.dart';
 import 'package:intl/intl.dart'; // To format the date easily
+import 'package:intl/intl.dart'; // To format the date easily
 
 class MyWarrantiesScreen extends StatefulWidget {
   final User user; // Accept user parameter
@@ -104,6 +105,7 @@ class _MyWarrantiesScreenState extends State<MyWarrantiesScreen> {
                         MaterialPageRoute(
                           builder: (context) => SelectedWarrantyScreen(
                             item: warranty,
+                            user: widget.user,
                           ),
                         ),
                       );
@@ -130,6 +132,17 @@ class _MyWarrantiesScreenState extends State<MyWarrantiesScreen> {
                       },
                       child: const Text('Add New Warranty'),
                     ),
+                    // ElevatedButton(
+                    //   onPressed: () {
+                    //     Navigator.push(
+                    //       context,
+                    //       MaterialPageRoute(
+                    //           builder: (context) =>
+                    //               const SelectedWarrantyScreen()),
+                    //     );
+                    //   },
+                    //   child: const Text('View Selected Warranty'),
+                    // ),
                     // ElevatedButton(
                     //   onPressed: () {
                     //     Navigator.push(
