@@ -1,48 +1,82 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
+import '../models/item.dart';
 import 'new_warranty_screen.dart';
 import 'selected_warranty_screen.dart';
-import 'package:intl/intl.dart'; // To format the date easily
-import 'package:intl/intl.dart'; // To format the date easily
+import '../services/firebase_service.dart';
+import 'package:intl/intl.dart';
 
 class MyWarrantiesScreen extends StatefulWidget {
-  final User user; // Accept user parameter
+  final User user;
+  final String userId;
 
-  const MyWarrantiesScreen(
-      {super.key, required this.user}); // Update constructor
+  const MyWarrantiesScreen({
+    super.key,
+    required this.user,
+    required this.userId,
+  });
 
   @override
-  _MyWarrantiesScreenState createState() => _MyWarrantiesScreenState();
+  State<MyWarrantiesScreen> createState() => _MyWarrantiesScreenState();
 }
 
 class _MyWarrantiesScreenState extends State<MyWarrantiesScreen> {
-  String _sortOption = 'Sort by Date (Oldest First)'; // Default sort option
+  final FirebaseService _firebaseService = FirebaseService();
+  String _sortOption = 'Sort by Date (Oldest First)';
 
-  // Function to calculate the time left for warranty
   String calculateTimeLeft(String endDate) {
-    DateTime warrantyEndDate = DateFormat('yyyy-MM-dd').parse(endDate);
-    Duration remaining = warrantyEndDate.difference(DateTime.now());
-
-    if (remaining.isNegative) {
-      return "Warranty is over";
-    } else {
-      int weeksLeft = (remaining.inDays / 7).floor();
-      return "$weeksLeft weeks left";
-    }
+    final end = DateFormat('yyyy-MM-dd').parse(endDate);
+    final remaining = end.difference(DateTime.now());
+    return remaining.isNegative 
+        ? "Expired" 
+        : "${(remaining.inDays / 7).floor()} weeks left";
   }
 
-  // Function to sort warranties by time left
   void _sortWarranties(String option) {
     setState(() {
       _sortOption = option;
       widget.user.items.sort((a, b) {
-        DateTime endA = DateFormat('yyyy-MM-dd').parse(a.getEndDate);
-        DateTime endB = DateFormat('yyyy-MM-dd').parse(b.getEndDate);
+        final endA = DateFormat('yyyy-MM-dd').parse(a.endDate);
+        final endB = DateFormat('yyyy-MM-dd').parse(b.endDate);
         return option == 'Sort by Date (Oldest First)'
             ? endA.compareTo(endB)
             : endB.compareTo(endA);
       });
     });
+  }
+
+  Future<void> _deleteItem(int index) async {
+    final item = widget.user.items[index];
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Warranty'),
+        content: Text('Delete ${item.name}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                await _firebaseService.deleteItem(widget.userId, item.id!);
+                setState(() => widget.user.items.removeAt(index));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Warranty deleted')),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error: ${e.toString()}')),
+                );
+              }
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -52,117 +86,83 @@ class _MyWarrantiesScreenState extends State<MyWarrantiesScreen> {
         title: const Text('My Warranties'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.exit_to_app),
-            onPressed: () {
-              // Simulating sign-out, replace with actual sign-out logic
-              Navigator.pop(context);
-            },
+            icon: const Icon(Icons.logout),
+            onPressed: () => Navigator.pop(context),
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Dropdown for sorting
-            Align(
-              alignment: Alignment.centerRight, // Align to the right
-              child: DropdownButton<String>(
-                value: _sortOption,
-                onChanged: (String? newValue) {
-                  if (newValue != null) {
-                    _sortWarranties(newValue);
-                  }
-                },
-                items: <String>[
-                  'Sort by Date (Oldest First)',
-                  'Sort by Date (Newest First)',
-                ].map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
+      body: Column(
+        children: [
+          Align(
+            alignment: Alignment.centerRight,
+            child: DropdownButton<String>(
+              value: _sortOption,
+              onChanged: (value) => _sortWarranties(value!),
+              items: [
+                'Sort by Date (Oldest First)',
+                'Sort by Date (Newest First)',
+              ].map((value) => DropdownMenuItem(
+                value: value,
+                child: Text(value),
+              )).toList(),
             ),
-            const SizedBox(height: 20),
-            // Warranty List
-            Expanded(
-              child: ListView.builder(
-                itemCount: widget
-                    .user.items.length, // Iterate through user's warranty items
-                itemBuilder: (context, index) {
-                  final warranty = widget.user.items[index];
-                  String timeLeft = calculateTimeLeft(warranty.getEndDate);
-
-                  return ListTile(
-                    title: Text(warranty.getName),
-                    subtitle: Text(timeLeft),
-                    onTap: () {
-                      // Navigate to SelectedWarrantyScreen with warranty details
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SelectedWarrantyScreen(
-                            item: warranty,
-                            user: widget.user,
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-            // User Info and Buttons
-            Column(
-              children: [
-                Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.spaceEvenly, // Align buttons in a row
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  NewWarrantyScreen(user: widget.user)),
-                        );
-                      },
-                      child: const Text('Add New Warranty'),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: widget.user.items.length,
+              itemBuilder: (context, index) {
+                final item = widget.user.items[index];
+                return Dismissible(
+                  key: Key(item.id!),
+                  background: Container(color: Colors.red),
+                  onDismissed: (_) => _deleteItem(index),
+                  child: ListTile(
+                    title: Text(item.name),
+                    subtitle: Text(calculateTimeLeft(item.endDate)),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => _deleteItem(index),
                     ),
-                    // ElevatedButton(
-                    //   onPressed: () {
-                    //     Navigator.push(
-                    //       context,
-                    //       MaterialPageRoute(
-                    //           builder: (context) =>
-                    //               const SelectedWarrantyScreen()),
-                    //     );
-                    //   },
-                    //   child: const Text('View Selected Warranty'),
-                    // ),
-                    // ElevatedButton(
-                    //   onPressed: () {
-                    //     Navigator.push(
-                    //       context,
-                    //       MaterialPageRoute(
-                    //           builder: (context) =>
-                    //               const SelectedWarrantyScreen()),
-                    //     );
-                    //   },
-                    //   child: const Text('View Selected Warranty'),
-                    // ),
-                  ],
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SelectedWarrantyScreen(
+                          user: widget.user,
+                          item: item,
+                          userId: widget.userId,
+                          itemId: item.id!,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                ElevatedButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => NewWarrantyScreen(
+                        userId: widget.userId,
+                        onItemAdded: (newItem) {
+                          setState(() => widget.user.items.add(newItem));
+                        },
+                      ),
+                    ),
+                  ),
+                  child: const Text('Add New Warranty'),
                 ),
-                const SizedBox(height: 20),
                 Text('Logged in as: ${widget.user.email}'),
-                Text('You have ${widget.user.items.length} warranty items'),
+                Text('Total items: ${widget.user.items.length}'),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

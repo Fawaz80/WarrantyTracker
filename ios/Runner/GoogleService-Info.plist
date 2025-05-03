@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyDiuliFn6QV3DNMsqSaSudaXKD7sC6Tf9g</string>
+	<key>GCM_SENDER_ID</key>
+	<string>488494581780</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.warrantyTrackerProject</string>
+	<key>PROJECT_ID</key>
+	<string>warranty-tracker-6727b</string>
+	<key>STORAGE_BUCKET</key>
+	<string>warranty-tracker-6727b.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:488494581780:ios:6db83dcbb2bc77f4967f01</string>
+</dict>
+</plist>

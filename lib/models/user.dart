@@ -2,20 +2,19 @@ import 'item.dart';
 
 class User {
   final String email;
-  final String password;
+  final String password; // Note: This is only for the local model, not stored in Firestore
   List<Item> items;
 
   User({
     required this.email,
-    required this.password,
+    this.password = '', // Default empty password
     this.items = const [],
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      email: json['email'],
-      password: json['password'],
-      items: (json['items'] as List)
+      email: json['email'] ?? '',
+      items: (json['items'] as List? ?? [])
           .map((itemJson) => Item.fromJson(itemJson))
           .toList(),
     );
@@ -24,7 +23,6 @@ class User {
   Map<String, dynamic> toJson() {
     return {
       'email': email,
-      'password': password,
       'items': items.map((item) => item.toJson()).toList(),
     };
   }

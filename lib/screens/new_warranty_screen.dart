@@ -1,180 +1,127 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:warranty_tracker_project/models/item.dart';
-import '../models/user.dart';
-import 'package:image_picker/image_picker.dart';
+import '../models/item.dart';
+import '../services/firebase_service.dart';
 
 class NewWarrantyScreen extends StatefulWidget {
-  final User user;
+  final String userId;
+  final Function(Item) onItemAdded;
 
-  const NewWarrantyScreen({super.key, required this.user});
+  const NewWarrantyScreen({
+    super.key,
+    required this.userId,
+    required this.onItemAdded,
+  });
 
   @override
   State<NewWarrantyScreen> createState() => _NewWarrantyScreenState();
 }
 
 class _NewWarrantyScreenState extends State<NewWarrantyScreen> {
-  final TextEditingController startDateController = TextEditingController();
-  final TextEditingController endDateController = TextEditingController();
-  final TextEditingController warrantyName = TextEditingController();
-  final TextEditingController receiptName = TextEditingController();
-  final TextEditingController notes = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _receiptController = TextEditingController();
+  final TextEditingController _startDateController = TextEditingController();
+  final TextEditingController _endDateController = TextEditingController();
+  final TextEditingController _notesController = TextEditingController();
+  final FirebaseService _firebaseService = FirebaseService();
+  bool _isLoading = false;
 
-  // @override
-  // void dispose() {
-  //   startDateController.dispose();
-  //   startDateController.dispose();
-  //   warrantyName.dispose();
-  //   receiptName.dispose();
-  //   notes.dispose();
-  //   super.dispose();
-  // }
+  Future<void> _selectDate(TextEditingController controller) async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (date != null) {
+      controller.text = DateFormat('yyyy-MM-dd').format(date);
+    }
+  }
+
+  Future<void> _saveItem() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final newItem = {
+        'name': _nameController.text,
+        'receipt': _receiptController.text,
+        'startDate': _startDateController.text,
+        'endDate': _endDateController.text,
+        'notes': _notesController.text,
+      };
+
+      final itemId = await _firebaseService.addItem(widget.userId, newItem);
+      
+      final item = Item.fromJson(newItem)..id = itemId;
+      widget.onItemAdded(item);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Warranty added successfully')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('New Warranty'),
-        centerTitle: true,
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+      appBar: AppBar(title: const Text('New Warranty')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
             children: [
-              buildTextField('Warranty Name', warrantyName),
-              const SizedBox(height: 20),
-              buildTextField('Receipt Number', receiptName),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  buildSelectDateButton('Start Date', startDateController),
-                  buildSelectDateButton('End Date', endDateController),
-                ],
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Item Name'),
+                validator: (value) => 
+                    value?.isEmpty ?? true ? 'Required field' : null,
+              ),
+              TextFormField(
+                controller: _receiptController,
+                decoration: const InputDecoration(labelText: 'Receipt Number'),
+              ),
+              TextFormField(
+                controller: _startDateController,
+                decoration: const InputDecoration(labelText: 'Start Date'),
+                readOnly: true,
+                onTap: () => _selectDate(_startDateController),
+                validator: (value) => 
+                    value?.isEmpty ?? true ? 'Required field' : null,
+              ),
+              TextFormField(
+                controller: _endDateController,
+                decoration: const InputDecoration(labelText: 'End Date'),
+                readOnly: true,
+                onTap: () => _selectDate(_endDateController),
+                validator: (value) => 
+                    value?.isEmpty ?? true ? 'Required field' : null,
+              ),
+              TextFormField(
+                controller: _notesController,
+                decoration: const InputDecoration(labelText: 'Notes'),
+                maxLines: 3,
               ),
               const SizedBox(height: 20),
-              buildTextField('Notes', notes),
-              const SizedBox(height: 20),
-              Text('Take picture of barcode/QR code'),
-              const SizedBox(height: 20),
-              // Button to allow user to select image or take a picture
               ElevatedButton(
-                onPressed: () async {
-                  final ImageSource? source = await showDialog<ImageSource>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Select Image Source'),
-                        actions: [
-                          TextButton(
-                            onPressed: () =>
-                                Navigator.pop(context, ImageSource.camera),
-                            child: const Text('Camera'),
-                          ),
-                          TextButton(
-                            onPressed: () =>
-                                Navigator.pop(context, ImageSource.gallery),
-                            child: const Text('Gallery'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-
-                  if (source != null) {
-                    // TODO: Use image_picker package save the image
-                  }
-                },
-                child: const Text('Select Image'),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Item newItem = Item(
-                        name: warrantyName.text,
-                        startDate: startDateController.text,
-                        endDate: endDateController.text,
-                        notes: notes.text,
-                        receipt: receiptName.text,
-                      );
-                      widget.user.items.add(newItem);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Warranty added successfully!'),
-                        ),
-                      );
-                      Navigator.pop(context, newItem);
-                    },
-                    child: const Text('Save'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      // dispose();
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Cancel'),
-                  ),
-                ],
+                onPressed: _isLoading ? null : _saveItem,
+                child: _isLoading
+                    ? const CircularProgressIndicator()
+                    : const Text('Save Warranty'),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget buildTextField(String hintText, TextEditingController controller) {
-    return TextField(
-      maxLines: 1,
-      controller: controller,
-      textAlign: TextAlign.center,
-      style: const TextStyle(fontSize: 20),
-      decoration: InputDecoration(
-        hintText: hintText,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.blue, width: 2),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.blue, width: 2),
-        ),
-      ),
-    );
-  }
-
-  Widget buildSelectDateButton(String label, TextEditingController controller) {
-    return SizedBox(
-      width: 150,
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          icon: const Icon(Icons.calendar_today),
-          labelText: label,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-        readOnly: true,
-        onTap: () async {
-          DateTime? pickedDate = await showDatePicker(
-            context: context,
-            initialDate: DateTime.now(),
-            firstDate: DateTime(1950),
-            lastDate: DateTime(2100),
-          );
-
-          if (pickedDate != null) {
-            String formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate);
-            setState(() {
-              controller.text = formattedDate;
-            });
-          }
-        },
       ),
     );
   }

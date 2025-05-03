@@ -1,53 +1,33 @@
-import 'dart:convert';
-import 'package:flutter/material.dart';
-
 class Item {
-  final String name;
+  String? id; // Add this for Firestore document ID
+  String name;
   String? receipt;
   String startDate;
   String endDate;
   String? notes;
-  Image? image;
 
   Item({
+    this.id,
     required this.name,
     this.receipt,
     required this.startDate,
     required this.endDate,
     this.notes,
-    this.image,
   });
 
-  // Getters
-  String get getName => name;
-  String? get getReceipt => receipt;
-  String get getStartDate => startDate;
-  String get getEndDate => endDate;
-  String? get getNotes => notes;
-  Image? get getImage => image;
+  // Remove all getters/setters and keep just the basic model
+  // Add fromJson and toJson methods
 
-  // Setters
-  set setReceipt(String? newReceipt) {
-    receipt = newReceipt;
+  factory Item.fromJson(Map<String, dynamic> json) {
+    return Item(
+      name: json['name'] ?? '',
+      receipt: json['receipt'],
+      startDate: json['startDate'] ?? '',
+      endDate: json['endDate'] ?? '',
+      notes: json['notes'],
+    );
   }
 
-  set setStartDate(String newStartDate) {
-    startDate = newStartDate;
-  }
-
-  set setEndDate(String newEndDate) {
-    endDate = newEndDate;
-  }
-
-  set setNotes(String? newNotes) {
-    notes = newNotes;
-  }
-
-  set setImage(Image? newImage) {
-    image = newImage;
-  }
-
-  // JSON serialization
   Map<String, dynamic> toJson() {
     return {
       'name': name,
@@ -55,18 +35,6 @@ class Item {
       'startDate': startDate,
       'endDate': endDate,
       'notes': notes,
-      // Note: Image is not serialized here - you'll need to handle image storage separately
     };
-  }
-
-  factory Item.fromJson(Map<String, dynamic> json) {
-    return Item(
-      name: json['name'],
-      receipt: json['receipt'],
-      startDate: json['startDate'],
-      endDate: json['endDate'],
-      notes: json['notes'],
-      // Image would need to be loaded separately
-    );
   }
 }
